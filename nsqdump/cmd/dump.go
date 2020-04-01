@@ -41,8 +41,8 @@ var (
 // dumpCmd represents the dump command
 var dumpCmd = &cobra.Command{
 	Use:   "dump",
-	Short: "dump nsqd backup data into a json file",
-	Long:  `dump nsqd backup data into a json file`,
+	Short: "dump nsqd backup data into json file",
+	Long:  `dump nsqd backup data into json file`,
 	Run: func(cmd *cobra.Command, args []string) {
 		//if user want to dump data of a specific topic
 		if cmd.Flags().Changed(TOPICSTR) {
@@ -128,10 +128,12 @@ func DumpSpecificTopic(datapath, outpath, topic string) error {
 	return nil
 }
 
+//given path, topic and filenum, return nsqd .dat file name
 func GetDataFileName(datapath, topic string, filenum uint64) string {
 	return fmt.Sprintf(path.Join(datapath, "%s.diskqueue.%06d.dat"), topic, filenum)
 }
 
+//given path, topic and filenum, return dumped .json file name
 func GetDumpFileName(outpath, topic string, filenum uint64) string {
 	return fmt.Sprintf(path.Join(outpath, "%s.diskqueue.%06d.json"), topic, filenum)
 }
