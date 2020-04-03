@@ -89,7 +89,7 @@ var pullCmd = &cobra.Command{
 		}
 
 		//copy the latest file to local .emacs.d directory
-		err = DoCopy(".emacs.d")
+		err = DoCopyFromRepoToLocal(".emacs.d")
 		if err != nil {
 			fmt.Println("copy file to .emacs.d error: ", err.Error())
 		}
@@ -124,7 +124,7 @@ func GetAbsLocalCnfPath(inputPath string) (string, error) {
 }
 
 //copy file to $HOME/destPath
-func DoCopy(destPath string) error {
+func DoCopyFromRepoToLocal(destPath string) error {
 	var err error
 	cwd, err := os.Getwd()
 	if err != nil {
