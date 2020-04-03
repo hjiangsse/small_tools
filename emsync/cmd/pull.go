@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -87,8 +88,11 @@ var pullCmd = &cobra.Command{
 			return
 		}
 
-		//copy the latest file to .emacs.d
-
+		//copy the latest file to local .emacs.d directory
+		err = DoCopy(".emacs.d")
+		if err != nil {
+			fmt.Println("copy file to .emacs.d error: ", err.Error())
+		}
 	},
 }
 
@@ -119,6 +123,79 @@ func GetAbsLocalCnfPath(inputPath string) (string, error) {
 	return inputPath, nil
 }
 
-func DoCopy(destPath string) {
+//copy file to $HOME/destPath
+func DoCopy(destPath string) error {
+	var err error
+	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
 
+	homedir, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+
+	destDirPath := path.Join(homedir, destPath)
+	initFilePath := path.Join(cwd, "inits/init.el")
+
+	modulesFilePath := path.Join(cwd, "modules")
+	modulesFileDstPath := path.Join(destDirPath, "modules/")
+
+	tempFilePath := path.Join(cwd, "templates")
+	tempFileDstPath := path.Join(destDirPath, "templates/")
+
+	utilsFilePath := path.Join(cwd, "utils")
+	utilsFileDstPath := path.Join(destDirPath, "utils/")
+
+	//copy emacs init file
+	cpInitCmd := exec.Command("cp", initFilePath, destDirPath)
+	err = cpInitCmd.Run()
+	if err != nil {
+		return err
+	}
+
+	//copy modules file
+	err = copyTo(modulesFilePath, modulesFileDstPath, ".el")
+	if err != nil {
+		return err
+	}
+
+	//copy template file
+	err = copyTo(tempFilePath, tempFileDstPath, ".txt")
+	if err != nil {
+		return err
+	}
+
+	//copy utils file
+	err = copyTo(utilsFilePath, utilsFileDstPath, ".el")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//copy all file in "source", which have "suffix" in the tail,
+//to "dest", example: copyTo("../test/source", "../test/dest", ".txt")
+func copyTo(source, dest, suffix string) error {
+	files, err := ioutil.ReadDir(source)
+	if err != nil {
+		return err
+	}
+
+	for _, f := range files {
+
+		if strings.Contains(f.Name(), suffix) {
+			cpCmd := exec.Command("cp", path.Join(source, f.Name()), dest)
+			err := cpCmd.Run()
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf("cp %v to %v\n", path.Join(source, f.Name()), dest)
+		}
+	}
+
+	return nil
 }
