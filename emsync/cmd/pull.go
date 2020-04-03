@@ -39,25 +39,56 @@ var pullCmd = &cobra.Command{
 	Short: "pull the latest github emacs configs",
 	Long:  `pull the latest emacs config files from github`,
 	Run: func(cmd *cobra.Command, args []string) {
-		//change to local repo directory
-		if _, err := os.Stat(path.Clean(localrepo)); os.IsNotExist(err) {
-			fmt.Printf("%v is not exist! Bye!\n", localrepo)
+		//preprocess local repo path
+		clrRepo, err := GetAbsLocalCnfPath(path.Clean(localrepo))
+		if err != nil {
+			fmt.Printf("Preprocess local repository path error! Bye!")
 			return
 		}
 
-		if err := os.Chdir(localrepo); err != nil {
+		//change to local repo directory
+		if _, err := os.Stat(clrRepo); os.IsNotExist(err) {
+			fmt.Printf("%v is not exist! Bye!\n", clrRepo)
+			return
+		}
+
+		if err := os.Chdir(clrRepo); err != nil {
 			fmt.Println("Change working dir error: ", err.Error())
+			return
+		}
+
+		//check if whether exists .git file in this directory
+		lsCmd := exec.Command("ls", "-a")
+		lsOut, err := lsCmd.Output()
+		if err != nil {
+			fmt.Println("ls -a error!")
+			return
+		}
+
+		if !strings.Contains(string(lsOut), ".git") {
+			fmt.Println("local repo dir has no .git file, error!")
 			return
 		}
 
 		//do clean and pull
 		cleanCmd := exec.Command("git", "clean", "-f")
 		fmt.Println("Running git clean -f...")
-		err := cleanCmd.Run()
+		err = cleanCmd.Run()
 		if err != nil {
 			fmt.Println("Git clean error: ", err.Error())
 			return
 		}
+
+		pullCmd := exec.Command("git", "pull")
+		fmt.Println("Running git pull...")
+		err = pullCmd.Run()
+		if err != nil {
+			fmt.Println("Git pull error: ", err.Error())
+			return
+		}
+
+		//copy the latest file to .emacs.d
+
 	},
 }
 
@@ -78,6 +109,16 @@ func init() {
 //given a user command inout path, change it into os absolute path
 func GetAbsLocalCnfPath(inputPath string) (string, error) {
 	if strings.Contains(inputPath, "~") {
-
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+		return strings.Replace(inputPath, "~", home, 1), nil
 	}
+
+	return inputPath, nil
+}
+
+func DoCopy(destPath string) {
+
 }
