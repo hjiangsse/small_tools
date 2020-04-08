@@ -1,0 +1,52 @@
+#!/bin/bash
+# This script fast make a screen region shot and move
+# the result png picture file to arbitray directory
+# this script use the gnome-screenshot as the base tool,
+# so it may malfunction on some system
+ubuntu_p() {
+	system=$(lsb_release -a 2>/dev/null| grep "Description")
+
+	if [[ $system == *"Ubuntu"* ]]; then
+		# 0 is true for bash
+	    return 0
+	else
+		return 1
+	fi
+}
+
+linux_p() {
+	uname=$(uname | cut -d" " -f 1)
+
+	if [[ $uname == *"Linux"* ]]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+macos_p() {
+	uname=$(uname | cut -d" " -f 1)
+
+	if [[ $uname == *"Darwin"* ]]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+
+#if working in a Linux mechine, such as ubuntu
+if linux_p
+then
+	touch ~/Pictures/latest.png
+	gnome-screenshot -a -f ~/Pictures/latest.png
+	mv ~/Pictures/latest.png $1
+fi
+
+if macos_p
+then
+	screencapture -s -f ~/Pictures/latest.png
+	mv ~/Pictures/latest.png $1
+fi
+
+
