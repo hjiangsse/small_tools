@@ -34,6 +34,10 @@ macos_p() {
 	fi
 }
 
+if [[ $# -ne 1 ]]; then
+	echo "Sorry! Please input path to strore the captured picture"
+	exit 0
+fi
 
 #if working in a Linux mechine, such as ubuntu
 if linux_p
