@@ -1,5 +1,6 @@
 /*
-Copyright © 2020 NAME HERE <EMAIL ADDRESS>
+Package cmd
+Copyright © 2020 hjiang <hjiang@sse.com.cn>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,10 +27,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+//some const string
 const (
-	BACKDIRSTR string = "backdir"
-	OUTDIRSTR  string = "outdir"
-	TOPICSTR   string = "topic"
+	BACKDIRSTR string = "backdir" //"backdir" const
+	OUTDIRSTR  string = "outdir"  //"outdir" const
+	TOPICSTR   string = "topic"   //"topic" const
 )
 
 var (
@@ -80,7 +82,7 @@ func init() {
 	dumpCmd.PersistentFlags().StringVarP(&topic, TOPICSTR, "t", "test", "the specific topic you want to dump")
 }
 
-//dump specific topic data under a path into json file to outpath
+//DumpSpecificTopic dump specific topic data under a path into json file to outpath
 func DumpSpecificTopic(datapath, outpath, topic string) error {
 	var filenum uint64
 	var err error
@@ -128,17 +130,17 @@ func DumpSpecificTopic(datapath, outpath, topic string) error {
 	return nil
 }
 
-//given path, topic and filenum, return nsqd .dat file name
+//GetDataFileName given path, topic and filenum, return nsqd .dat file name
 func GetDataFileName(datapath, topic string, filenum uint64) string {
 	return fmt.Sprintf(path.Join(datapath, "%s.diskqueue.%06d.dat"), topic, filenum)
 }
 
-//given path, topic and filenum, return dumped .json file name
+//GetDumpFileName given path, topic and filenum, return dumped .json file name
 func GetDumpFileName(outpath, topic string, filenum uint64) string {
 	return fmt.Sprintf(path.Join(outpath, "%s.diskqueue.%06d.json"), topic, filenum)
 }
 
-//get all topic name under a specific directory
+//GetAllTopics get all topic name under a specific directory
 func GetAllTopics(datapath string) ([]string, error) {
 	var res []string
 	topicMap := make(map[string]bool)
@@ -156,7 +158,7 @@ func GetAllTopics(datapath string) ([]string, error) {
 		}
 	}
 
-	for key, _ := range topicMap {
+	for key := range topicMap {
 		res = append(res, key)
 	}
 

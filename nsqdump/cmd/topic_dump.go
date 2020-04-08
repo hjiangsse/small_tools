@@ -19,19 +19,21 @@ const (
 	messageidEnd int = 42
 )
 
+//OneMessage one line of message
 type OneMessage struct {
 	DataLen     uint32
 	TimeStamp   uint64
-	Attapts     uint16
+	Attampts    uint16
 	MessageID   string
 	MessageBody string
 }
 
+//Messages all message in a backup file
 type Messages struct {
 	Messages []OneMessage
 }
 
-//the structure of one data record is like:
+//DecodeAndDumpNsqBackFile the structure of one data record is like:
 //[recordlen(4 byte)]|[timestamp[0:8]|attampts[8:10]|messageid[10:42]|messagebody[42:]]
 func DecodeAndDumpNsqBackFile(origFile, destFile string) error {
 	var oneMsg OneMessage
@@ -102,10 +104,10 @@ func DecodeAndDumpNsqBackFile(origFile, destFile string) error {
 	return nil
 }
 
-// Convert a byte slice into a Message Struct
+//ConvByteSliceToMessage Convert a byte slice into a Message Struct
 func ConvByteSliceToMessage(msgSlice []byte, msg *OneMessage) {
 	msg.TimeStamp = binary.BigEndian.Uint64(msgSlice[:timestampEnd])
-	msg.Attapts = binary.BigEndian.Uint16(msgSlice[timestampEnd:attamptsEnd])
+	msg.Attampts = binary.BigEndian.Uint16(msgSlice[timestampEnd:attamptsEnd])
 	msg.MessageID = string(msgSlice[attamptsEnd:messageidEnd])
 	msg.MessageBody = string(msgSlice[messageidEnd:])
 }
