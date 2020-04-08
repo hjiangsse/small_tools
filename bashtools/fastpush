@@ -1,0 +1,9 @@
+#!/bin/bash
+git pull
+echo "pull remote repository finish!"
+git add *
+echo "git add finish!"
+git commit -m "commit"
+echo "git commit finish!"
+git push
+echo "push to remote repository finish!"
