@@ -34,9 +34,11 @@ macos_p() {
 	fi
 }
 
-if [[ $# -ne 1 ]]; then
-	echo "Sorry! Please input path to strore the captured picture"
-	exit 0
+if [[ $# -ne 2 ]]; then
+	echo "Sorry! invalid usage"
+	echo "usage: "
+    echo "  fastshot ~/dir1/dir2 newname.png"
+	exit 1
 fi
 
 #if working in a Linux mechine, such as ubuntu
@@ -45,12 +47,18 @@ then
 	touch ~/Pictures/latest.png
 	gnome-screenshot -a -f ~/Pictures/latest.png
 	mv ~/Pictures/latest.png $1
+	cd $1
+	mv latest.png $2
+	cd -
 fi
 
 if macos_p
 then
 	screencapture -s -f ~/Pictures/latest.png
 	mv ~/Pictures/latest.png $1
+	cd $1
+	mv latest.png $2
+	cd -
 fi
 
 
