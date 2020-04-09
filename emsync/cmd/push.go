@@ -25,16 +25,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-/*
-const (
-	LOCALREPOSTR string = "localrepo"
-)
-
-var (
-	localrepo string
-)
-*/
-
 // pushCmd represents the push command
 var pushCmd = &cobra.Command{
 	Use:   "push",
@@ -88,6 +78,7 @@ var pushCmd = &cobra.Command{
 		gitCommitCmd := exec.Command("git", "commit", "-m", "commit")
 		res, err := gitCommitCmd.Output()
 		if err != nil && !strings.Contains(string(res), "up to date") {
+			fmt.Println(err)
 			return
 		}
 		fmt.Println("git commit finish!")
@@ -127,22 +118,26 @@ func DoCopyFromLocalToRepo(localPath string, destPath string) error {
 	if err != nil {
 		return err
 	}
+	fmt.Printf("copy %v to %v finish!\n", localInitPath, destInitPath)
 
 	//copy modules files to local github repo
 	err = copyTo(localModulesPath, destModulesPath, ".el")
 	if err != nil {
+		fmt.Println("copy modules files error!")
 		return err
 	}
 
 	//copy templates files to local github repo
 	err = copyTo(localTempsPath, destTempsPath, ".txt")
 	if err != nil {
+		fmt.Println("copy templates files error!")
 		return err
 	}
 
 	//copy utils files to local github repo
 	err = copyTo(localUtilsPath, destUtilsPath, ".el")
 	if err != nil {
+		fmt.Println("copy utils files error!")
 		return err
 	}
 
