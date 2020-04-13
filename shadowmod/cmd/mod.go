@@ -111,21 +111,14 @@ var modCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(modCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
 	modCmd.PersistentFlags().StringVarP(&configpath, CONFPATHSTR, "c", "/etc/shadowsocks.json", "config file path")
 	modCmd.PersistentFlags().StringVarP(&serveraddr, SVADDRSTR, "s", "127.0.0.1", "the new server address you want to plant into the config")
 	modCmd.PersistentFlags().StringVarP(&localaddr, LCADDRSTR, "l", "127.0.0.1", "the new local address you want to plant into the config")
 	modCmd.PersistentFlags().Uint32VarP(&localport, LCPORTSTR, "p", 8080, "the new local port you want to plant into the config")
-	modCmd.PersistentFlags().Uint32VarP(&serverport, SVPORTSTR, "v", 8080, "the new server port you want to plant into the config")
+	modCmd.PersistentFlags().Uint32VarP(&serverport, SVPORTSTR, "v", 33128, "the new server port you want to plant into the config")
+	modCmd.PersistentFlags().StringVarP(&password, PASSWDSTR, "a", "hZdHLzqdM3", "the new password you want to plant into the config")
 	modCmd.PersistentFlags().Uint32VarP(&timeout, TIMEOUTSTR, "t", 600, "the new timeout you want to plant into the config")
 	modCmd.PersistentFlags().StringVarP(&method, METHODSTR, "m", "aes-256-cfb", "the new method you want to plant into the config")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// modCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 //load infomation from the config file, the file is json file(default path: /etc/shadowsocks.json)
