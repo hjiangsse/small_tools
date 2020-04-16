@@ -1,0 +1,33 @@
+#!/bin/bash
+
+help() {
+	echo "Usage: "
+	echo "    fastgrep (-h) ask help information"
+	echo "    fastgrep -l pattern dir, find all the file in dir which match this pattern and list line information"
+	echo "    fastgrep -r pattern newpattern dir, replace all pattern to newpattern for all files under dir"
+}
+
+#help information
+if [[ $# -eq 0 ]] || [[ $1 == "-h" ]]; then
+	help
+	exit 0
+fi
+
+#find and list all files match the pattern
+if [[ $1 == "-l" ]] && [[ $# -le 3 ]]; then
+	if [[ $# -eq 2 ]]; then
+		grep --color -nH -r --null -e $2 .
+	else
+		grep --color -nH -r --null -e $2 $3
+	fi
+	exit 0
+fi
+
+#replace all files match the pattern
+if [[ $1 == "-r" ]] && [[ $# -le 4 ]]; then
+	if [[ $# -eq 3 ]]; then
+		grep -rl $2 ./ | xargs sed -i "s/${2}/${3}/g"
+	else
+		grep -rl $2 $4 | xargs sed -i "s/${2}/${3}/g"
+	fi
+fi
