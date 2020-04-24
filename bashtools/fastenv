@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [[ $# -lt 1 ]]; then
+	echo "No path need add to ENV"
+fi
+
+for arg in $@; do
+	if [[ -e ${arg} ]]; then
+		path=`readlink -f ${arg}`
+		echo "export PATH=\"${path}/:\$PATH\"" >> ~/.profile
+		source ~/.profile
+	else
+		echo "${arg} is not exit, can not add to PATH"
+	fi
+done
+
