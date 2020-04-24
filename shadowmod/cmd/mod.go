@@ -19,6 +19,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
+	"net"
 	"os"
 	"os/exec"
 	"strings"
@@ -36,7 +38,13 @@ type ShadowConfig struct {
 	Method   string `json:"method"`
 }
 
+type DnsIpConfig struct {
+	Dnshost string `json:"host"`
+	IpAddr  string `json:"latest_address"`
+}
+
 const (
+	DNSPATHSTR  string = "dnscnfpath"
 	CONFPATHSTR string = "configpath"
 	SVADDRSTR   string = "serveraddr"
 	LCADDRSTR   string = "localaddr"
@@ -49,6 +57,7 @@ const (
 
 // modCmd represents the mod command
 var (
+	dnscnfpath string
 	configpath string
 	serveraddr string
 	localaddr  string
@@ -64,53 +73,46 @@ var modCmd = &cobra.Command{
 	Short: "modify shadowsock config infomation",
 	Long:  `ask user input the new config information for shadowsocks`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cfg, err := loadConfigInfo("/etc/shadowsocks.json")
+		//load shadowsocks.json
+		cfg, err := loadConfigInfo(configpath)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
+			os.Exit(1)
 		}
 
-		fmt.Println("Original Config Infomation:")
-		fmt.Println("---------------------------------")
-		fmt.Printf("%+v\n", cfg)
-		fmt.Println("---------------------------------")
-
-		changeConfigInfo(cmd, &cfg)
-		fmt.Println("Changed Config Infomation:")
-		fmt.Println("---------------------------------")
-		fmt.Printf("%+v\n", cfg)
-		fmt.Println("---------------------------------")
-
-		//write new config info back to file
-		writeConfBack(&cfg, "./temp_shadowsocks.json")
-
-		//use sudo to replace the old config file
-		execCmd := exec.Command("/bin/sh", "-c", "sudo mv ./temp_shadowsocks.json /etc/shadowsocks.json")
-		execCmd.Run()
-
-		psCmd := exec.Command("/bin/sh", "-c", "ps aux|grep sslocal|grep python")
-		psOut, err := psCmd.Output()
+		//load shadowdns.json
+		dnscfg, err := loadDnsConfInfo(dnscnfpath)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
+			os.Exit(1)
 		}
 
-		res := strings.Split(string(psOut), "\n")
-		for _, line := range res {
-			if strings.Contains(line, "shadowsocks.json") {
-				sslocalPrcessId := strings.Fields(line)[1]
-				killPara := fmt.Sprintf("sudo kill -9 %s", sslocalPrcessId)
-				killCmd := exec.Command("/bin/sh", "-c", killPara)
-				killCmd.Run()
-			}
+		//compare latest dns ip address with the privious address
+		dnsip, err := getLastDnsIp(dnscfg.Dnshost)
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
 		}
 
-		restartCmd := exec.Command("/bin/sh", "-c", "sslocal -c /etc/shadowsocks.json &")
-		restartCmd.Run()
+		if dnscfg.IpAddr == dnsip {
+			log.Printf("The previous dns ip is %v, the latest is %v, not change! Go on, boy!\n",
+				dnscfg.IpAddr, dnsip)
+			os.Exit(0)
+		}
+
+		//if dns ip changed, change the config files
+		err = doCnfsChangeAndClientRestart(cmd, &cfg, &dnscfg, dnsip)
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(modCmd)
 
+	modCmd.PersistentFlags().StringVarP(&dnscnfpath, DNSPATHSTR, "d", "/etc/shadowdns.json", "config file path")
 	modCmd.PersistentFlags().StringVarP(&configpath, CONFPATHSTR, "c", "/etc/shadowsocks.json", "config file path")
 	modCmd.PersistentFlags().StringVarP(&serveraddr, SVADDRSTR, "s", "127.0.0.1", "the new server address you want to plant into the config")
 	modCmd.PersistentFlags().StringVarP(&localaddr, LCADDRSTR, "l", "127.0.0.1", "the new local address you want to plant into the config")
@@ -121,9 +123,103 @@ func init() {
 	modCmd.PersistentFlags().StringVarP(&method, METHODSTR, "m", "aes-256-cfb", "the new method you want to plant into the config")
 }
 
+// change shadowsocks.json and shadowdns.json if latest dns ip changed
+func doCnfsChangeAndClientRestart(cmd *cobra.Command, cnf *ShadowConfig, dnscnf *DnsIpConfig, latestip string) error {
+	fmt.Println("Original Config Information:")
+	fmt.Println("---------------------------------")
+	fmt.Printf("%+v\n", *cnf)
+	fmt.Println("---------------------------------")
+
+	changeConfigInfo(cmd, cnf)
+	fmt.Println("Changed Config Information:")
+	fmt.Println("---------------------------------")
+	fmt.Printf("%+v\n", *cnf)
+	fmt.Println("---------------------------------")
+
+	//write new config info back to file
+	err := writeCnfStructBackToFile(*cnf, "./temp_shadowsocks.json")
+	if err != nil {
+		return err
+	}
+
+	//write new dns config info back to file
+	dnscnf.IpAddr = latestip
+	err = writeCnfStructBackToFile(*dnscnf, "./temp_shadowdns.json")
+	if err != nil {
+		return err
+	}
+
+	//use sudo to replace the old config file
+	mvCfgCmd := exec.Command("/bin/sh", "-c", "sudo mv ./temp_shadowsocks.json /etc/shadowsocks.json")
+	err = mvCfgCmd.Run()
+	if err != nil {
+		return err
+	}
+
+	mvDnsCmd := exec.Command("/bin/sh", "-c", "sudo mv ./temp_shadowdns.json /etc/shadowdns.json")
+	err = mvDnsCmd.Run()
+	if err != nil {
+		return err
+	}
+
+	psCmd := exec.Command("/bin/sh", "-c", "ps aux|grep sslocal|grep python")
+	psOut, err := psCmd.Output()
+	if err != nil {
+		return err
+	}
+
+	res := strings.Split(string(psOut), "\n")
+	for _, line := range res {
+		if strings.Contains(line, "shadowsocks.json") {
+			sslocalPrcessId := strings.Fields(line)[1]
+			killPara := fmt.Sprintf("sudo kill -9 %s", sslocalPrcessId)
+			killCmd := exec.Command("/bin/sh", "-c", killPara)
+
+			err := killCmd.Run()
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	restartCmd := exec.Command("/bin/sh", "-c", "sslocal -c /etc/shadowsocks.json &")
+	err = restartCmd.Run()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// get the latest ip address from the dns host
+func getLastDnsIp(host string) (string, error) {
+	nowaddr, err := net.LookupIP(host)
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
+	return nowaddr[0].String(), nil
+}
+
+// load dns and ip config file, the file is a json file(default path: /etc/shadowdns.json)
+func loadDnsConfInfo(path string) (DnsIpConfig, error) {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return DnsIpConfig{}, err
+	}
+
+	var cfg DnsIpConfig
+	err = json.Unmarshal(data, &cfg)
+	if err != nil {
+		return DnsIpConfig{}, err
+	}
+
+	return cfg, nil
+}
+
 //load infomation from the config file, the file is json file(default path: /etc/shadowsocks.json)
 func loadConfigInfo(path string) (ShadowConfig, error) {
-	//read file
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return ShadowConfig{}, err
@@ -168,7 +264,7 @@ func changeConfigInfo(cmd *cobra.Command, cfg *ShadowConfig) {
 	}
 }
 
-func writeConfBack(cfg *ShadowConfig, path string) error {
+func writeCnfStructBackToFile(v interface{}, path string) error {
 	file, err := os.Create(path)
 	if err != nil {
 		return err
@@ -176,7 +272,7 @@ func writeConfBack(cfg *ShadowConfig, path string) error {
 
 	defer file.Close()
 
-	b, err := json.Marshal(*cfg)
+	b, err := json.Marshal(v)
 	if err != nil {
 		return err
 	}
