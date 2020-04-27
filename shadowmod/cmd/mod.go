@@ -218,10 +218,7 @@ func doFirefoxProfileChange(cfg *ProxyConfig) error {
 	}
 
 	profileabspath := releasedir + "/prefs.js"
-	fmt.Println(profileabspath)
-
 	newInsCmdStr := fmt.Sprintf("firefox -P %v --new-instance &", profileabspath)
-	fmt.Println(newInsCmdStr)
 	newInsCmd := exec.Command("/bin/sh", "-c", newInsCmdStr)
 	err = newInsCmd.Run()
 	if err != nil {
