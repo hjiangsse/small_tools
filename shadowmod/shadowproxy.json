@@ -1,0 +1,6 @@
+{
+  "proxytype":2,
+  "socksdns":true,
+  "socksaddr":"127.0.0.1",
+  "socksport":1090
+}

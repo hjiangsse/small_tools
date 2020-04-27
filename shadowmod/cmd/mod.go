@@ -23,6 +23,8 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"os/user"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -43,29 +45,38 @@ type DnsIpConfig struct {
 	IpAddr  string `json:"latest_address"`
 }
 
+type ProxyConfig struct {
+	ProxyType      uint32 `json:"proxytype"`
+	SocksRemoteDns bool   `json:"socksdns"`
+	SocksAddr      string `json:"socksaddr"`
+	SocksPort      uint32 `json:"socksport"`
+}
+
 const (
-	DNSPATHSTR  string = "dnscnfpath"
-	CONFPATHSTR string = "configpath"
-	SVADDRSTR   string = "serveraddr"
-	LCADDRSTR   string = "localaddr"
-	LCPORTSTR   string = "localport"
-	SVPORTSTR   string = "serverport"
-	PASSWDSTR   string = "password"
-	TIMEOUTSTR  string = "timeout"
-	METHODSTR   string = "method"
+	PROXYPATHSTR string = "proxycnfpath"
+	DNSPATHSTR   string = "dnscnfpath"
+	CONFPATHSTR  string = "configpath"
+	SVADDRSTR    string = "serveraddr"
+	LCADDRSTR    string = "localaddr"
+	LCPORTSTR    string = "localport"
+	SVPORTSTR    string = "serverport"
+	PASSWDSTR    string = "password"
+	TIMEOUTSTR   string = "timeout"
+	METHODSTR    string = "method"
 )
 
 // modCmd represents the mod command
 var (
-	dnscnfpath string
-	configpath string
-	serveraddr string
-	localaddr  string
-	localport  uint32
-	serverport uint32
-	password   string
-	timeout    uint32
-	method     string
+	proxycnfpath string
+	dnscnfpath   string
+	configpath   string
+	serveraddr   string
+	localaddr    string
+	localport    uint32
+	serverport   uint32
+	password     string
+	timeout      uint32
+	method       string
 )
 
 var modCmd = &cobra.Command{
@@ -82,6 +93,23 @@ var modCmd = &cobra.Command{
 
 		//load shadowdns.json
 		dnscfg, err := loadDnsConfInfo(dnscnfpath)
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+
+		//load shadowproxy.json
+		proxycfg, err := loadProxyConfInfo(proxycnfpath)
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+
+		//fmt.Println(proxycfg)
+
+		//after change the shadowsocks configs, change firefox profiles
+		//and start a new instance of firfox for user
+		err = doFirefoxProfileChange(&proxycfg)
 		if err != nil {
 			log.Fatal(err)
 			os.Exit(1)
@@ -112,7 +140,8 @@ var modCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(modCmd)
 
-	modCmd.PersistentFlags().StringVarP(&dnscnfpath, DNSPATHSTR, "d", "/etc/shadowdns.json", "config file path")
+	modCmd.PersistentFlags().StringVarP(&dnscnfpath, DNSPATHSTR, "d", "/etc/shadowdns.json", "dns config file path")
+	modCmd.PersistentFlags().StringVarP(&proxycnfpath, PROXYPATHSTR, "x", "/etc/shadowproxy.json", "proxy config file path")
 	modCmd.PersistentFlags().StringVarP(&configpath, CONFPATHSTR, "c", "/etc/shadowsocks.json", "config file path")
 	modCmd.PersistentFlags().StringVarP(&serveraddr, SVADDRSTR, "s", "127.0.0.1", "the new server address you want to plant into the config")
 	modCmd.PersistentFlags().StringVarP(&localaddr, LCADDRSTR, "l", "127.0.0.1", "the new local address you want to plant into the config")
@@ -121,6 +150,55 @@ func init() {
 	modCmd.PersistentFlags().StringVarP(&password, PASSWDSTR, "a", "hZdHLzqdM3", "the new password you want to plant into the config")
 	modCmd.PersistentFlags().Uint32VarP(&timeout, TIMEOUTSTR, "t", 600, "the new timeout you want to plant into the config")
 	modCmd.PersistentFlags().StringVarP(&method, METHODSTR, "m", "aes-256-cfb", "the new method you want to plant into the config")
+}
+
+func doFirefoxProfileChange(cfg *ProxyConfig) error {
+	//find firefox profile file
+	curusr, err := user.Current()
+	if err != nil {
+		return err
+	}
+
+	//get the path of user preference file
+	profilepath := curusr.HomeDir + "/.mozilla/firefox/*-release/prefs.js"
+
+	//check and change proxy type
+	newtype := "\"network.proxy.type\", " + strconv.Itoa(int(cfg.ProxyType)) + ");"
+	newaddr := "\"network.proxy.socks\", " + "\"" + cfg.SocksAddr + "\"" + ");"
+	newport := "\"network.proxy.socks_port\", " + strconv.Itoa(int(cfg.SocksPort)) + ");"
+	newdns := "\"network.proxy.socks_remote_dns\", " + strconv.FormatBool(cfg.SocksRemoteDns) + ");"
+
+	chgTypeStr := fmt.Sprintf("sed -i 's/\\(\"network.proxy.type\", .*\\)/%v/g' %v", newtype, profilepath)
+	chgAddrStr := fmt.Sprintf("sed -i 's/\\(\"network.proxy.socks\", .*\\)/%v/g' %v", newaddr, profilepath)
+	chgPortStr := fmt.Sprintf("sed -i 's/\\(\"network.proxy.socks_port\", .*\\)/%v/g' %v", newport, profilepath)
+	chgDnsStr := fmt.Sprintf("sed -i 's/\\(\"network.proxy.socks_remote_dns\", .*\\)/%v/g' %v", newdns, profilepath)
+
+	//do file change
+	chgTypeCmd := exec.Command("/bin/sh", "-c", chgTypeStr)
+	err = chgTypeCmd.Run()
+	if err != nil {
+		return err
+	}
+
+	chgAddrCmd := exec.Command("/bin/sh", "-c", chgAddrStr)
+	err = chgAddrCmd.Run()
+	if err != nil {
+		return err
+	}
+
+	chgPortCmd := exec.Command("/bin/sh", "-c", chgPortStr)
+	err = chgPortCmd.Run()
+	if err != nil {
+		return err
+	}
+
+	chgDnsCmd := exec.Command("/bin/sh", "-c", chgDnsStr)
+	err = chgDnsCmd.Run()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // change shadowsocks.json and shadowdns.json if latest dns ip changed
@@ -201,6 +279,22 @@ func getLatestDnsIp(host string) (string, error) {
 	}
 
 	return nowaddr[0].String(), nil
+}
+
+// load shadowsocks proxy config info
+func loadProxyConfInfo(path string) (ProxyConfig, error) {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return ProxyConfig{}, err
+	}
+
+	var cfg ProxyConfig
+	err = json.Unmarshal(data, &cfg)
+	if err != nil {
+		return ProxyConfig{}, err
+	}
+
+	return cfg, nil
 }
 
 // load dns and ip config file, the file is a json file(default path: /etc/shadowdns.json)
