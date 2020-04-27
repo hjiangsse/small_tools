@@ -198,6 +198,17 @@ func doFirefoxProfileChange(cfg *ProxyConfig) error {
 		return err
 	}
 
+	//crate a new mozzila firefox instance
+	newInsCmd := exec.Command("/bin/sh", "-c", "firefox &")
+	err = newInsCmd.Run()
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("------------------------------------------------------")
+	fmt.Println("-------外面的世界很精彩，外面的世界也很无奈-----------")
+	fmt.Println("------------------------------------------------------")
+
 	return nil
 }
 
