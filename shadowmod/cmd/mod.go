@@ -88,7 +88,7 @@ var modCmd = &cobra.Command{
 		}
 
 		//compare latest dns ip address with the privious address
-		dnsip, err := getLastDnsIp(dnscfg.Dnshost)
+		dnsip, err := getLatestDnsIp(dnscfg.Dnshost)
 		if err != nil {
 			log.Fatal(err)
 			os.Exit(1)
@@ -131,6 +131,7 @@ func doCnfsChangeAndClientRestart(cmd *cobra.Command, cnf *ShadowConfig, dnscnf 
 	fmt.Println("---------------------------------")
 
 	changeConfigInfo(cmd, cnf)
+	cnf.Svaddr = latestip
 	fmt.Println("Changed Config Information:")
 	fmt.Println("---------------------------------")
 	fmt.Printf("%+v\n", *cnf)
@@ -192,7 +193,7 @@ func doCnfsChangeAndClientRestart(cmd *cobra.Command, cnf *ShadowConfig, dnscnf 
 }
 
 // get the latest ip address from the dns host
-func getLastDnsIp(host string) (string, error) {
+func getLatestDnsIp(host string) (string, error) {
 	nowaddr, err := net.LookupIP(host)
 	if err != nil {
 		log.Fatal(err)
