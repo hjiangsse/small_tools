@@ -161,6 +161,7 @@ func doFirefoxProfileChange(cfg *ProxyConfig) error {
 
 	//get the path of user preference file
 	profilepath := curusr.HomeDir + "/.mozilla/firefox/*-release/prefs.js"
+	profiledir := curusr.HomeDir + "/.mozilla/firefox/"
 
 	//check and change proxy type
 	newtype := "\"network.proxy.type\", " + strconv.Itoa(int(cfg.ProxyType)) + ");"
@@ -199,7 +200,29 @@ func doFirefoxProfileChange(cfg *ProxyConfig) error {
 	}
 
 	//crate a new mozzila firefox instance
-	newInsCmd := exec.Command("/bin/sh", "-c", "firefox &")
+	err = os.Chdir(profiledir)
+	if err != nil {
+		return err
+	}
+
+	fds, err := ioutil.ReadDir(".")
+	if err != nil {
+		return nil
+	}
+
+	releasedir := profiledir
+	for _, fd := range fds {
+		if strings.Contains(fd.Name(), ("-release")) {
+			releasedir = releasedir + fd.Name()
+		}
+	}
+
+	profileabspath := releasedir + "/prefs.js"
+	fmt.Println(profileabspath)
+
+	newInsCmdStr := fmt.Sprintf("firefox -P %v --new-instance &", profileabspath)
+	fmt.Println(newInsCmdStr)
+	newInsCmd := exec.Command("/bin/sh", "-c", newInsCmdStr)
 	err = newInsCmd.Run()
 	if err != nil {
 		return err
