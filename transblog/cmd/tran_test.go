@@ -46,6 +46,25 @@ func Test_isOrgSource(t *testing.T) {
 	}
 }
 
+func Test_isInsImage(t *testing.T) {
+	tests := []struct {
+		source []byte
+		wanted bool
+	}{
+		{[]byte("  [[file:./graph/test.png][this is a test image]]  "), true},
+		{[]byte("[[file:./graph/test.png][this is a test image]]  "), true},
+		{[]byte("   [[file:./graph/test.png][this is a test image]]"), true},
+		{[]byte("[[file:./graph/test.png[this is a test image]]"), false},
+	}
+
+	for _, tt := range tests {
+		isImage := isInsImage(tt.source)
+		if isImage != tt.wanted {
+			t.Errorf("line %s is not a image line, but wanted %v\n", string(tt.source), tt.wanted)
+		}
+	}
+}
+
 func Test_transSourceLine(t *testing.T) {
 	tests := []struct {
 		source []byte

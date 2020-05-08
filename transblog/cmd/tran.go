@@ -16,20 +16,26 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
 
 var (
-	inputpath  string
-	outputpath string
+	inputpath    string
+	outputpath   string
+	imagepath    string
+	orgimagepath string
 )
 
 var (
 	titileLine = regexp.MustCompile(`^(\**) .*$`)
 	sourceLine = regexp.MustCompile(`\s*#\+(BEGIN|END)_SRC.*`)
+	imageLine  = regexp.MustCompile(`\s*\[\[file:(.*)\]\[(.*)\]\]\s*`)
 )
 
 const (
@@ -51,25 +57,12 @@ tool to transform org file to markdown file`,
 		fmt.Println("input path: ", inputpath)
 		fmt.Println("output path: ", outputpath)
 
-		testLine := []byte("**** This is a test line")
-		if isOrgTitle(testLine) {
-			fmt.Println(string(transTitleLine(testLine)))
+		testImageLine := []byte("    [[file:graph/hjiang.png][This is a test image]]    ")
+		mdImageLine, err := transImageLine(testImageLine, "image")
+		if err != nil {
+			panic(err)
 		}
-
-		testSource1 := []byte("   #+BEGIN_SRC go  ")
-		if isOrgSouce(testSource1) {
-			fmt.Println(string(transSourceLine(testSource1)))
-		}
-
-		testSource2 := []byte("#+BEGIN_SRC go  ")
-		if isOrgSouce(testSource2) {
-			fmt.Println(string(transSourceLine(testSource2)))
-		}
-
-		testSource3 := []byte("#+END_SRC go  ")
-		if isOrgSouce(testSource3) {
-			fmt.Println(string(transSourceLine(testSource3)))
-		}
+		fmt.Println(string(mdImageLine))
 	},
 }
 
@@ -79,6 +72,8 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	tranCmd.PersistentFlags().StringVarP(&inputpath, "input-file", "i", "input.org", "the path of the file for transform")
 	tranCmd.PersistentFlags().StringVarP(&outputpath, "output-file", "o", "output.md", "the path of the file for output")
+	tranCmd.PersistentFlags().StringVarP(&imagepath, "image-dir", "d", "./graph", "the path of the images directory")
+	tranCmd.PersistentFlags().StringVarP(&orgimagepath, "org-image-dir", "g", "~/github/orgnization/graph", "the path of the org image directory")
 }
 
 // tell if a line is org title
@@ -92,6 +87,15 @@ func isOrgTitle(line []byte) bool {
 // tell if a line is org source code snippet
 func isOrgSouce(line []byte) bool {
 	if sourceLine.Match(line) {
+		return true
+	}
+	return false
+}
+
+// tell if a line stands org inserted image
+// example: [[file:graph/ack_send.png][send five tasks to rebbitMq]]
+func isInsImage(line []byte) bool {
+	if imageLine.Match(line) {
 		return true
 	}
 	return false
@@ -152,4 +156,24 @@ func transSourceLine(line []byte) []byte {
 	}
 
 	return res
+}
+
+// transform org image line to markdown version
+func transImageLine(line []byte, imagePath string) ([]byte, error) {
+	trimedLine := strings.Trim(string(line), "[] ")
+	trimedSegs := strings.Split(trimedLine, "][")
+
+	if len(trimedSegs) > 2 || len(trimedSegs) == 0 {
+		return nil, errors.New("invalid org image line, two many segments")
+	}
+
+	fileSegs := strings.Split(trimedSegs[0], ":")
+	if len(fileSegs) != 2 {
+		return nil, errors.New("invalid org file path")
+	}
+
+	fileName := filepath.Base(fileSegs[1])
+	mdFileName := filepath.Join(imagePath, fileName)
+
+	return []byte("![" + trimedSegs[1] + "](" + mdFileName + ")"), nil
 }
