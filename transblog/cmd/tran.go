@@ -89,7 +89,8 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	tranCmd.PersistentFlags().StringVarP(&inputpath, "input-file", "i", "input.org", "the path of the file for transform")
 	tranCmd.PersistentFlags().StringVarP(&outputpath, "output-file", "o", "output.md", "the path of the file for output")
-	tranCmd.PersistentFlags().StringVarP(&imagepath, "image-dir", "d", "https://github.com/hjiangsse/Org/tree/master/personal_write/rabbitcluster", "the path of the images directory")
+	tranCmd.PersistentFlags().StringVarP(&imagepath, "image-dir", "d",
+		"https://github.com/hjiangsse/Org/tree/master/personal_write/rabbitcluster", "the path of the images directory")
 }
 
 //transform source (.org) file into dest (.md) file
