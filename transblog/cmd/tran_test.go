@@ -87,3 +87,17 @@ func Test_transSourceLine(t *testing.T) {
 		}
 	}
 }
+
+func nouse() {
+	/*
+		fmt.Println("input path: ", inputpath)
+		fmt.Println("output path: ", outputpath)
+
+		testImageLine := []byte("    [[file:graph/hjiang.png][This is a test image]]    ")
+		mdImageLine, err := transImageLine(testImageLine, imagepath)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(string(mdImageLine))
+	*/
+}

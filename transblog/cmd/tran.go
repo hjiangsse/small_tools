@@ -16,8 +16,11 @@ limitations under the License.
 package cmd
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"log"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -26,14 +29,13 @@ import (
 )
 
 var (
-	inputpath    string
-	outputpath   string
-	imagepath    string
-	orgimagepath string
+	inputpath  string
+	outputpath string
+	imagepath  string
 )
 
 var (
-	titileLine = regexp.MustCompile(`^(\**) .*$`)
+	titileLine = regexp.MustCompile(`^(\*+) .*$`)
 	sourceLine = regexp.MustCompile(`\s*#\+(BEGIN|END)_SRC.*`)
 	imageLine  = regexp.MustCompile(`\s*\[\[file:(.*)\]\[(.*)\]\]\s*`)
 )
@@ -51,18 +53,33 @@ const (
 var tranCmd = &cobra.Command{
 	Use:   "tran",
 	Short: "org file transform to md file",
-	Long: `jekyll use markdown file as post page, so i need a
-tool to transform org file to markdown file`,
+	Long: `jekyll use markdown file as post page, so i need a tool to
+transform org file to markdown file
+           usage:
+           transblog tran -i input.org -o output.md -d image_url_path`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("input path: ", inputpath)
-		fmt.Println("output path: ", outputpath)
-
-		testImageLine := []byte("    [[file:graph/hjiang.png][This is a test image]]    ")
-		mdImageLine, err := transImageLine(testImageLine, "image")
+		//open the source org file
+		infile, err := os.Open(inputpath)
 		if err != nil {
-			panic(err)
+			log.Printf("open input file error: %v\n", err)
+			os.Exit(1)
 		}
-		fmt.Println(string(mdImageLine))
+		defer infile.Close()
+
+		//create or open the dest md file
+		outfile, err := os.Create(outputpath)
+		if err != nil {
+			log.Printf("open output file error: %v\n", err)
+			os.Exit(1)
+		}
+		defer outfile.Close()
+
+		//trans source file line by line into dest file
+		err = transformFile(infile, outfile, imagepath)
+		if err != nil {
+			log.Printf("transform %v to %v failed!\n", infile.Name(), outfile.Name())
+			os.Exit(1)
+		}
 	},
 }
 
@@ -72,8 +89,45 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	tranCmd.PersistentFlags().StringVarP(&inputpath, "input-file", "i", "input.org", "the path of the file for transform")
 	tranCmd.PersistentFlags().StringVarP(&outputpath, "output-file", "o", "output.md", "the path of the file for output")
-	tranCmd.PersistentFlags().StringVarP(&imagepath, "image-dir", "d", "./graph", "the path of the images directory")
-	tranCmd.PersistentFlags().StringVarP(&orgimagepath, "org-image-dir", "g", "~/github/orgnization/graph", "the path of the org image directory")
+	tranCmd.PersistentFlags().StringVarP(&imagepath, "image-dir", "d", "https://github.com/hjiangsse/Org/tree/master/personal_write/rabbitcluster", "the path of the images directory")
+}
+
+//transform source (.org) file into dest (.md) file
+func transformFile(src *os.File, dst *os.File, imgpath string) error {
+	scanner := bufio.NewScanner(src)
+	for scanner.Scan() {
+		curLineSlice := []byte(scanner.Text())
+
+		//if current line is org title line
+		if isOrgTitle(curLineSlice) {
+			fmt.Println(string(transTitleLine(curLineSlice)))
+			dst.WriteString(string(transTitleLine(curLineSlice)) + "\n")
+			continue
+		}
+
+		//if current line is code snippet begin or end
+		if isOrgSouce(curLineSlice) {
+			fmt.Println(string(transSourceLine(curLineSlice)))
+			dst.WriteString(string(transSourceLine(curLineSlice)) + "\n")
+			continue
+		}
+
+		//if current line is image file line
+		if isInsImage(curLineSlice) {
+			mdInsLineSlice, err := transImageLine(curLineSlice, imgpath)
+			if err != nil {
+				log.Println(err)
+				os.Exit(1)
+			}
+			fmt.Println(string(mdInsLineSlice))
+			dst.WriteString(string(mdInsLineSlice) + "\n")
+			continue
+		}
+
+		//other normal lines
+		dst.WriteString(string(curLineSlice) + "  \n")
+	}
+	return nil
 }
 
 // tell if a line is org title
@@ -142,7 +196,7 @@ func transSourceLine(line []byte) []byte {
 				state = S_BEGIN_SOURCE_END
 			}
 		case S_END_SOURCE:
-			if e == ' ' {
+			if e == 'C' {
 				res = append(res, []byte("``` ")...)
 				state = S_END_SOURCE_END
 			}
