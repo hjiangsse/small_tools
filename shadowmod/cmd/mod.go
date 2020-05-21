@@ -43,6 +43,7 @@ type ShadowConfig struct {
 type DnsIpConfig struct {
 	Dnshost string `json:"host"`
 	IpAddr  string `json:"latest_address"`
+	Method  string `json:"method"`
 }
 
 type ProxyConfig struct {
@@ -105,8 +106,6 @@ var modCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		//fmt.Println(proxycfg)
-
 		//after change the shadowsocks configs, change firefox profiles
 		//and start a new instance of firfox for user
 		err = doFirefoxProfileChange(&proxycfg)
@@ -125,7 +124,6 @@ var modCmd = &cobra.Command{
 		if dnscfg.IpAddr == dnsip {
 			log.Printf("The previous dns ip is %v, the latest is %v, not change! Go on, boy!\n",
 				dnscfg.IpAddr, dnsip)
-			os.Exit(0)
 		}
 
 		//if dns ip changed, change the config files
@@ -239,7 +237,7 @@ func doCnfsChangeAndClientRestart(cmd *cobra.Command, cnf *ShadowConfig, dnscnf 
 	fmt.Printf("%+v\n", *cnf)
 	fmt.Println("---------------------------------")
 
-	changeConfigInfo(cmd, cnf)
+	changeConfigInfo(cmd, cnf, dnscnf)
 	cnf.Svaddr = latestip
 	fmt.Println("Changed Config Information:")
 	fmt.Println("---------------------------------")
@@ -360,7 +358,7 @@ func loadConfigInfo(path string) (ShadowConfig, error) {
 	return cfg, nil
 }
 
-func changeConfigInfo(cmd *cobra.Command, cfg *ShadowConfig) {
+func changeConfigInfo(cmd *cobra.Command, cfg *ShadowConfig, dnscfg *DnsIpConfig) {
 	if cmd.Flags().Changed(SVADDRSTR) {
 		cfg.Svaddr = serveraddr
 	}
