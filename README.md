@@ -6,6 +6,6 @@
 - bashtools -- fastpush: fast push local repository to remote  
 <pr>
                fastshot: fast capture a region screen shot, and move the png file  
-                         to a destination
-	       fastenv: fast add a exec path to PATH  
+                         to a destination  
+	       fastenv: fast add a exec path to PATH     
 </pr>
