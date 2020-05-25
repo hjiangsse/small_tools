@@ -126,7 +126,7 @@ func transformFile(src *os.File, dst *os.File, imgpath string) error {
 		}
 
 		//other normal lines
-		dst.WriteString(strings.TrimSpace(string(curLineSlice)) + "\n")
+		dst.WriteString(string(curLineSlice) + "\n")
 	}
 	return nil
 }
