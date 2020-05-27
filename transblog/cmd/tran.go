@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -31,7 +32,9 @@ import (
 var (
 	inputpath  string
 	outputpath string
-	imagepath  string
+	srcimgpath string
+	dstimgpath string
+	blogpath   string
 )
 
 var (
@@ -75,7 +78,7 @@ transform org file to markdown file
 		defer outfile.Close()
 
 		//trans source file line by line into dest file
-		err = transformFile(infile, outfile, imagepath)
+		err = transformFile(infile, outfile)
 		if err != nil {
 			log.Printf("transform %v to %v failed!\n", infile.Name(), outfile.Name())
 			os.Exit(1)
@@ -89,12 +92,13 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	tranCmd.PersistentFlags().StringVarP(&inputpath, "input-file", "i", "input.org", "the path of the file for transform")
 	tranCmd.PersistentFlags().StringVarP(&outputpath, "output-file", "o", "output.md", "the path of the file for output")
-	tranCmd.PersistentFlags().StringVarP(&imagepath, "image-dir", "d",
-		"https://github.com/hjiangsse/Org/tree/master/personal_write/rabbitcluster", "the path of the images directory")
+	tranCmd.PersistentFlags().StringVarP(&srcimgpath, "srcimg-path", "s", "/Users/hjiang/github/orgnization/graph", "the source image file")
+	tranCmd.PersistentFlags().StringVarP(&dstimgpath, "dstimg-path", "d", "/assets/gc", "the dest image path")
+	tranCmd.PersistentFlags().StringVarP(&blogpath, "blog-path", "b", "/Users/hjiang/github/myblog/hjiangsse.github.io", "the blog path")
 }
 
 //transform source (.org) file into dest (.md) file
-func transformFile(src *os.File, dst *os.File, imgpath string) error {
+func transformFile(src *os.File, dst *os.File) error {
 	scanner := bufio.NewScanner(src)
 	for scanner.Scan() {
 		curLineSlice := []byte(scanner.Text())
@@ -115,7 +119,7 @@ func transformFile(src *os.File, dst *os.File, imgpath string) error {
 
 		//if current line is image file line
 		if isInsImage(curLineSlice) {
-			mdInsLineSlice, err := transImageLine(curLineSlice, imgpath)
+			mdInsLineSlice, err := transImageLine(curLineSlice)
 			if err != nil {
 				log.Println(err)
 				os.Exit(1)
@@ -214,7 +218,7 @@ func transSourceLine(line []byte) []byte {
 }
 
 // transform org image line to markdown version
-func transImageLine(line []byte, imagePath string) ([]byte, error) {
+func transImageLine(line []byte) ([]byte, error) {
 	trimedLine := strings.Trim(string(line), "[] ")
 	trimedSegs := strings.Split(trimedLine, "][")
 
@@ -228,7 +232,24 @@ func transImageLine(line []byte, imagePath string) ([]byte, error) {
 	}
 
 	fileName := filepath.Base(fileSegs[1])
-	mdFileName := filepath.Join(imagePath, fileName)
+	mdFileName := filepath.Join(dstimgpath, fileName)
+
+	srcimgurl := filepath.Join(srcimgpath, fileName)
+	dstimgpath := filepath.Join(blogpath, dstimgpath)
+
+	if _, err := os.Stat(dstimgpath); os.IsNotExist(err) {
+		mkcmd := exec.Command("mkdir", dstimgpath)
+		err := mkcmd.Run()
+		if err != nil {
+			return []byte(""), err
+		}
+	}
+
+	cpcmd := exec.Command("cp", srcimgurl, dstimgpath)
+	err := cpcmd.Run()
+	if err != nil {
+		return []byte(""), err
+	}
 
 	return []byte("![" + trimedSegs[1] + "](" + mdFileName + ")"), nil
 }
