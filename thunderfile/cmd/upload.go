@@ -140,6 +140,8 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		fmt.Println("Upload file finish!")
 	},
 }
 
