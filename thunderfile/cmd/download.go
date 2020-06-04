@@ -62,7 +62,7 @@ to quickly create a Cobra application.`,
 			log.Fatal(err)
 		}
 
-		mvCmd := exec.Command("/bin/sh", "-c", "mv * "+absLocalPath)
+		mvCmd := exec.Command("/usr/bin/sh", "-c", "mv * "+absLocalPath)
 		err = mvCmd.Run()
 		if err != nil {
 			log.Fatal(err)
