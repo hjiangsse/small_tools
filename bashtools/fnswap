@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+    echo "Usage: "
+    echo "fnswap on   -- let fn key have its power to control the mechine"
+    echo "fnswap off  -- let fn key just be Fn key on keyboard"
+    echo "fnswap show -- show the current status of Fn keys"
+fi
+
+if [[ $1 == "on" ]] || [[ $1 == "ON" ]]; then
+    sudo solaar config 1 fn-swap on
+fi
+
+if [[ $1 == "off" ]] || [[ $1 == "OFF" ]]; then
+    sudo solaar config 1 fn-swap off
+fi
+
+if [[ $1 == "show" ]] || [[ $1 == "SHOW" ]]; then
+    sudo solaar config 1
+fi
+
+

@@ -1,0 +1,28 @@
+{
+  "FieldInfos" : [
+    {"FieldLen": 8, "FieldName": "TimeStamp", "FieldType": "int64", "InitVal": "1"},
+    {"FieldLen": 8, "FieldName": "OrderEntryTime", "FieldType": "int64", "InitVal": "1"},
+	{"FieldLen": 8, "FieldName": "OrderExpiryTime", "FieldType": "int64", "InitVal": "1"},
+	{"FieldLen": 8, "FieldName": "OrderNumber", "FieldType": "int64", "InitVal": "1"},
+	{"FieldLen": 8, "FieldName": "OrderPrice", "FieldType": "int64", "InitVal": "1"},
+	{"FieldLen": 8, "FieldName": "OrderExecutedQuantity", "FieldType": "int64", "InitVal": "1"},
+	{"FieldLen": 8, "FieldName": "OrderQuantity", "FieldType": "int64", "InitVal": "1"},
+	{"FieldLen": 2, "FieldName": "isix", "FieldType": "uint16", "InitVal": "1"},
+	{"FieldLen": 5, "FieldName": "PBUID", "FieldType": "string", "InitVal": "12345"},
+	{"FieldLen": 10, "FieldName": "InvestorAccountID", "FieldType": "string", "InitVal": "12345789"},
+	{"FieldLen": 1, "FieldName": "AccountTypeCode", "FieldType": "string","InitVal": "C"},
+	{"FieldLen": 5, "FieldName": "BranchID", "FieldType": "string", "InitVal": "ABCDE"},
+	{"FieldLen": 16, "FieldName": "PbuInternalOrderNum", "FieldType": "string", "InitVal": "hjiangheng"},
+	{"FieldLen": 12, "FieldName": "Text", "FieldType": "string", "InitVal": "hello world"},
+	{"FieldLen": 5, "FieldName": "ClearingParticipantID", "FieldType": "string", "InitVal": "hello"},
+	{"FieldLen": 1, "FieldName": "AuditTypeCode", "FieldType": "string", "InitVal": "B"},
+	{"FieldLen": 2, "FieldName": "OrderTypeCode", "FieldType": "string", "InitVal": "HA"}, 
+	{"FieldLen": 2, "FieldName": "TrdRestrictionTypeCode", "FieldType": "string", "InitVal": "JH"},
+	{"FieldLen": 1, "FieldName": "OrderStatus", "FieldType": "string", "InitVal": "D"},
+	{"FieldLen": 1, "FieldName": "BuySellCoder", "FieldType": "string", "InitVal": "H"},
+	{"FieldLen": 1, "FieldName": "OrderRestrictionCode", "FieldType": "string", "InitVal": "G"},
+	{"FieldLen": 1, "FieldName": "ShortSellCheckingFlag", "FieldType": "string", "InitVal": "U"},
+	{"FieldLen": 1, "FieldName": "TransactionMaintainCode", "FieldType": "string", "InitVal": "I"},
+	{"FieldLen": 1, "FieldName": "CreditTag", "FieldType": "string", "InitVal": "O"},
+	{"FieldLen": 5, "FieldName": "Filler", "FieldType": "string", "InitVal": "FILLE"} ]
+}

@@ -92,9 +92,9 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	tranCmd.PersistentFlags().StringVarP(&inputpath, "input-file", "i", "input.org", "the path of the file for transform")
 	tranCmd.PersistentFlags().StringVarP(&outputpath, "output-file", "o", "output.md", "the path of the file for output")
-	tranCmd.PersistentFlags().StringVarP(&srcimgpath, "srcimg-path", "s", "/Users/hjiang/github/orgnization/graph", "the source image file")
+	tranCmd.PersistentFlags().StringVarP(&srcimgpath, "srcimg-path", "s", "~/github/orgnization/graph", "the source image file")
 	tranCmd.PersistentFlags().StringVarP(&dstimgpath, "dstimg-path", "d", "/assets/gc", "the dest image path")
-	tranCmd.PersistentFlags().StringVarP(&blogpath, "blog-path", "b", "/Users/hjiang/github/myblog/hjiangsse.github.io", "the blog path")
+	tranCmd.PersistentFlags().StringVarP(&blogpath, "blog-path", "b", "~/github/myblog/hjiangsse.github.io", "the blog path")
 }
 
 //transform source (.org) file into dest (.md) file
@@ -234,8 +234,21 @@ func transImageLine(line []byte) ([]byte, error) {
 	fileName := filepath.Base(fileSegs[1])
 	mdFileName := filepath.Join(dstimgpath, fileName)
 
-	srcimgurl := filepath.Join(srcimgpath, fileName)
-	dstimgpath := filepath.Join(blogpath, dstimgpath)
+	absSrcImgPath, err := getAbsPath(srcimgpath)
+	if err != nil {
+		return []byte(""), err
+	}
+	srcimgurl := filepath.Join(absSrcImgPath, fileName)
+
+	absBlogPath, err := getAbsPath(blogpath)
+	if err != nil {
+		return []byte(""), err
+	}
+	dstimgpath := filepath.Join(absBlogPath, dstimgpath)
+
+	fmt.Println(absBlogPath)
+	fmt.Println(srcimgurl)
+	fmt.Println(dstimgpath)
 
 	if _, err := os.Stat(dstimgpath); os.IsNotExist(err) {
 		mkcmd := exec.Command("mkdir", dstimgpath)
@@ -246,10 +259,20 @@ func transImageLine(line []byte) ([]byte, error) {
 	}
 
 	cpcmd := exec.Command("cp", srcimgurl, dstimgpath)
-	err := cpcmd.Run()
+	err = cpcmd.Run()
 	if err != nil {
 		return []byte(""), err
 	}
 
 	return []byte("![" + trimedSegs[1] + "](" + mdFileName + ")"), nil
+}
+
+//get the absolute path from root dir
+func getAbsPath(orig string) (string, error) {
+	homedir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	return strings.Replace(orig, "~", homedir, 1), nil
 }
