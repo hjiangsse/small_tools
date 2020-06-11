@@ -52,7 +52,7 @@ to quickly create a Cobra application.`,
 			os.Exit(1)
 		}
 
-		//initialize github clinet
+		//initialize github client
 		ctx := context.Background()
 		ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 		tc := oauth2.NewClient(ctx, ts)
@@ -70,10 +70,10 @@ to quickly create a Cobra application.`,
 		}
 
 		//clone the repo to local place
-		gitUrl := "https://github.com/" + username + "/" + repo + ".git"
-		fmt.Println(gitUrl)
+		gitSsh := "git@github.com:" + username + "/" + repo + ".git"
+		fmt.Println("[Upload: " + gitSsh + "]")
 
-		cloneCmd := exec.Command("git", "clone", gitUrl)
+		cloneCmd := exec.Command("git", "clone", gitSsh)
 		err = cloneCmd.Run()
 		if err != nil {
 			log.Fatal(err)
@@ -84,6 +84,7 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			log.Fatal(err)
 		}
+		
 		var cpCmd *exec.Cmd
 		pathInfo, err := os.Stat(absLocalPath)
 		if err != nil {

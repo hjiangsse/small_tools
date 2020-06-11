@@ -24,8 +24,10 @@ import (
 	"path/filepath"
 	"strconv"
 	"time"
-
+	
+	
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 var lcdir string
@@ -42,47 +44,65 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		//clone the remote repository to local place
-		gitUrl := "https://github.com/" + username + "/" + repo + ".git"
-		fmt.Println(gitUrl)
-
-		cloneCmd := exec.Command("git", "clone", gitUrl)
+		gitSsh := "git@github.com:" + username + "/" + repo + ".git"
+		fmt.Println("[Repo: " + gitSsh + "]")
+		
+		cloneCmd := exec.Command("git", "clone", gitSsh)
 		err := cloneCmd.Run()
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		fmt.Println("[download: repo clone finished!]")
+		
 		//copy out all file in repo under local repository
 		absLocalPath, err := filepath.Abs(lcdir)
 		if err != nil {
 			log.Fatal(err)
-		}
-
+	
 		err = os.Chdir(repo)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		mvCmd := exec.Command("/usr/bin/sh", "-c", "mv * "+absLocalPath)
-		err = mvCmd.Run()
+		//walk through all files under current directory, move it
+		//to the dest place
+		err = filepath.Walk(".",
+			func(path string, info os.FileInfo, err error) error {
+				if err != nil {
+					log.Fatal(err)
+					return err
+				}
+
+				if !strings.Contains(path, ".git") && path[0] != '.' {
+					destpath := filepath.Join(absLocalPath, path)
+					os.Rename(path, destpath)
+					os.Remove(path)
+				}
+				return nil
+			})
+			
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		fmt.Println("[download: copy repo file to local finish!]")
+		
 		//push the empty repo to remote
 		//do git push in local repository
-		addCmd := exec.Command("git", "add", "*")
-		err = addCmd.Run()
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 		index := rnd.Intn(10000000)
 		indexstr := strconv.Itoa(index)
 		cmtstr := "commit" + indexstr
 
-		cmtCmd := exec.Command("git", "commit", "-m", cmtstr)
+		cmtCmd := exec.Command("git", "commit", "-a", "-m", cmtstr)
 		err = cmtCmd.Run()
+		if err != nil {
+			log.Fatal(err)
+		}
+		
+		pushCmd := exec.Command("git", "push")
+		err = pushCmd.Run()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -98,7 +118,8 @@ to quickly create a Cobra application.`,
 			log.Fatal(err)
 		}
 
-		fmt.Println("Download file finish!")
+		fmt.Println("[Download: Download file finish! Update remote repository OK!]")
+		}
 	},
 }
 
