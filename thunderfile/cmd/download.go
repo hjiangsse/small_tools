@@ -59,6 +59,7 @@ to quickly create a Cobra application.`,
 		absLocalPath, err := filepath.Abs(lcdir)
 		if err != nil {
 			log.Fatal(err)
+		}
 	
 		err = os.Chdir(repo)
 		if err != nil {
@@ -119,7 +120,6 @@ to quickly create a Cobra application.`,
 		}
 
 		fmt.Println("[Download: Download file finish! Update remote repository OK!]")
-		}
 	},
 }
 
