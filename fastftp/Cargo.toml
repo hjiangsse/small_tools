@@ -1,0 +1,13 @@
+[package]
+name = "fastftp"
+version = "0.1.0"
+authors = ["hjiang <hjiang@sse.com.cn>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ftp = "3.0.1"
+toml = "0.5.6"
+serde = "1.0"
+serde_derive = "1.0.115"

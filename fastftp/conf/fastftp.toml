@@ -1,0 +1,13 @@
+#This is the config file for the "fastftp" tool
+
+title = "fastftp configs"
+
+[remote]
+ip = "127.0.0.1"
+port = 21
+username = "pi"
+passwd = "jiang186212"
+
+[command]
+cphashs = [["/home/pi/Playground/WanderLand/FastFtpTest/input/test1.txt", "~/Playground/WanderLand/FastFtpTest/output"],
+           ["/home/pi/Playground/WanderLand/FastFtpTest/input/test2.txt", "~/Playground/WanderLand/FastFtpTest/output"]]
