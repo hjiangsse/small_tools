@@ -1,0 +1,21 @@
+#This is the config file for the "ifmcode" tool
+
+title = "ifmcode configs"
+
+[metainfo]
+filetype = "TXT"
+ifmindexname = "IFM_TEST_INDEX"
+ifmindexnum = 10001
+ficherindexname = "FICHER_TEST_INDEX"
+ficherindexnum = 10002
+
+[fieldinfos]
+fields = [["filed1", "char", 10],
+          ["field2", "char", 13],
+          ["field3", "uint64", 20],
+          ["field4", "char", 16]]
+
+[filterinfos]
+#[filed_name, start_offset_in_currrent_field, end_offset_in_current_field]
+filters = [["field2", 0, 3],
+          ["field4", 17, 17]]
