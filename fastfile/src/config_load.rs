@@ -27,11 +27,11 @@ impl Config {
         self.addrs.clone()
     }
 
-    pub fn get_local_addr(&self) -> String {
+    pub fn get_local_domain(&self) -> String {
         self.localpath.clone()
     }
 
-    pub fn get_remote_addr(&self) -> String {
+    pub fn get_remote_domain(&self) -> String {
         self.remotepath.clone()
     }
 }
