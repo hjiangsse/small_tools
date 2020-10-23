@@ -42,7 +42,7 @@ fn main() {
     if choose_index <= config_addrs.len() {
         //send file to remote mechine
         if opt.send && !opt.download {
-            let file_list = get_files_under_some_path(&local_search_domain, &opt.filename);
+            let file_list = get_local_files_under_some_path(&local_search_domain, &opt.filename);
             for (pos, e) in file_list.iter().enumerate() {
                 println!("{}: {}", pos + 1, e);
             }
@@ -53,7 +53,7 @@ fn main() {
             );
 
             if choose_file_index <= file_list.len() && choose_file_index > 0 {
-                user_interface::scp_file_to_remote_mechine(
+                user_interface::upload_file_to_remote_mechine(
                     &config_addrs[choose_index - 1],
                     &file_list[choose_file_index - 1],
                     &remote_search_domain,
@@ -68,6 +68,14 @@ fn main() {
                 user_interface::exec_ssh_remote_command(&config_addrs[choose_index - 1], "ls -l");
             println!("{}", exec_res);
              */
+
+            println!("hello");
+            let search_res = user_interface::search_remote_files_under_some_path(
+                &config_addrs[choose_index - 1],
+                &remote_search_domain,
+                &opt.filename,
+            );
+            println!("{}", search_res);
         }
     } else {
         println!("You choose the wrong address, bye!");
@@ -95,7 +103,7 @@ fn expand_tilde<P: AsRef<Path>>(path_user_input: P) -> Option<PathBuf> {
     })
 }
 
-fn get_files_under_some_path(path: &str, file_name: &str) -> Vec<String> {
+fn get_local_files_under_some_path(path: &str, file_name: &str) -> Vec<String> {
     let mut files = Vec::new();
 
     println!("{}", path);

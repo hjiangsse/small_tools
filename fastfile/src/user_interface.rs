@@ -24,7 +24,24 @@ pub fn promote_user_input_index(promote: &str) -> usize {
     choose_index
 }
 
-pub fn scp_file_to_remote_mechine(addrinfo: &str, local_file_path: &str, remote_file_dir: &str) {
+pub fn search_remote_files_under_some_path(
+    remote_addr: &str,
+    remote_path: &str,
+    file_name: &str,
+) -> String {
+    let mut exec_cmd = String::new();
+    exec_cmd.push_str("find -L ");
+    exec_cmd.push_str(remote_path);
+    exec_cmd.push_str(" -name *");
+    exec_cmd.push_str(file_name);
+    exec_cmd.push_str("*");
+
+    println!("I will exec remote command");
+
+    exec_ssh_remote_command(remote_addr, &exec_cmd)
+}
+
+pub fn upload_file_to_remote_mechine(addrinfo: &str, local_file_path: &str, remote_file_dir: &str) {
     let (user, hostaddr, passwd) = parse_addr_elements(addrinfo);
 
     println!("-----------Remote Mechine Info---------------");
@@ -79,11 +96,14 @@ pub fn exec_ssh_remote_command(addrinfo: &str, cmd: &str) -> String {
     sess.handshake(&tcp).unwrap();
     sess.userauth_password(&user, &passwd).unwrap();
 
+    println!("{}", cmd);
+
     let mut channel = sess.channel_session().unwrap();
     channel.exec(cmd).unwrap();
 
     let mut s = String::new();
     channel.read_to_string(&mut s).unwrap();
+    println!("{}", s);
     s
 }
 
