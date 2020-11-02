@@ -120,8 +120,6 @@ fn expand_tilde<P: AsRef<Path>>(path_user_input: P) -> Option<PathBuf> {
 fn get_local_files_under_some_path(path: &str, file_name: &str) -> Vec<String> {
     let mut files = Vec::new();
 
-    println!("{}", path);
-
     for entry in WalkDir::new(path)
         .follow_links(true)
         .into_iter()

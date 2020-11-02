@@ -1,5 +1,6 @@
 use ssh2::Session;
 use std::fs;
+use std::fs::File;
 use std::io::stdin;
 use std::io::Read;
 use std::io::Write;
@@ -7,7 +8,7 @@ use std::net::TcpStream;
 use std::path::Path;
 
 pub fn list_all_remote_addresses(addrs: &[String]) {
-    println!("The remote addresses are here: ");
+    println!("The remote addresses: ");
     for (index, addr) in addrs.iter().enumerate() {
         println!("{}-{}", index + 1, addr);
     }
@@ -48,12 +49,6 @@ pub fn download_file_from_remote_mechine(
 ) {
     let (user, hostaddr, passwd) = parse_addr_elements(addrinfo);
 
-    println!("-----------Remote Mechine Info---------------");
-    println!("User: {}", user);
-    println!("HostAddr: {}", hostaddr);
-    println!("PassWord: {}", passwd);
-    println!("---------------------------------------------");
-
     let mut addr_port = String::new();
     addr_port.push_str(&hostaddr);
     addr_port.push_str(":22");
@@ -65,23 +60,24 @@ pub fn download_file_from_remote_mechine(
     sess.userauth_password(&user, &passwd).unwrap();
 
     let remote_path = Path::new(remote_file_path);
+    let (mut remote_file, _) = sess.scp_recv(remote_path).unwrap();
 
-    let (mut remote_file, stat) = sess.scp_recv(remote_path).unwrap();
-    println!("remote file size: {}", stat.size());
     let mut contents = Vec::new();
     remote_file.read_to_end(&mut contents).unwrap();
 
-    println!("{:?}", contents);
+    let local_file = Path::new(local_file_dir).join(remote_path.file_name().unwrap());
+
+    let mut local_write = File::create(local_file).unwrap();
+    local_write.write(&contents).unwrap();
+
+    println!(
+        "Down load file *{}* from *{}* finish!",
+        remote_file_path, addrinfo
+    );
 }
 
 pub fn upload_file_to_remote_mechine(addrinfo: &str, local_file_path: &str, remote_file_dir: &str) {
     let (user, hostaddr, passwd) = parse_addr_elements(addrinfo);
-
-    println!("-----------Remote Mechine Info---------------");
-    println!("User: {}", user);
-    println!("HostAddr: {}", hostaddr);
-    println!("PassWord: {}", passwd);
-    println!("---------------------------------------------");
 
     let mut addr_port = String::new();
     addr_port.push_str(&hostaddr);
@@ -108,16 +104,15 @@ pub fn upload_file_to_remote_mechine(addrinfo: &str, local_file_path: &str, remo
         .unwrap();
 
     remote_file.write(&data).unwrap();
+
+    println!(
+        "Upload *{}* to remote *{}* finish!",
+        local_file_path, addrinfo
+    );
 }
 
 pub fn exec_ssh_remote_command(addrinfo: &str, cmd: &str) -> String {
     let (user, hostaddr, passwd) = parse_addr_elements(addrinfo);
-
-    println!("-----------Remote Mechine Info---------------");
-    println!("User: {}", user);
-    println!("HostAddr: {}", hostaddr);
-    println!("PassWord: {}", passwd);
-    println!("---------------------------------------------");
 
     let mut addr_port = String::new();
     addr_port.push_str(&hostaddr);

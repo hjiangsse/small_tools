@@ -15,6 +15,7 @@ pub fn load_config_from_path(path: &str) -> Config {
 }
 
 impl Config {
+    /*
     fn new() -> Config {
         Config {
             localpath: String::from(""),
@@ -22,6 +23,7 @@ impl Config {
             addrs: vec![String::from("")],
         }
     }
+    */
 
     pub fn get_addrs(&self) -> Vec<String> {
         self.addrs.clone()
