@@ -36,9 +36,42 @@ pub fn search_remote_files_under_some_path(
     exec_cmd.push_str(file_name);
     exec_cmd.push_str("*");
 
-    println!("I will exec remote command");
-
     exec_ssh_remote_command(remote_addr, &exec_cmd)
+        .trim_end()
+        .to_string()
+}
+
+pub fn download_file_from_remote_mechine(
+    addrinfo: &str,
+    remote_file_path: &str,
+    local_file_dir: &str,
+) {
+    let (user, hostaddr, passwd) = parse_addr_elements(addrinfo);
+
+    println!("-----------Remote Mechine Info---------------");
+    println!("User: {}", user);
+    println!("HostAddr: {}", hostaddr);
+    println!("PassWord: {}", passwd);
+    println!("---------------------------------------------");
+
+    let mut addr_port = String::new();
+    addr_port.push_str(&hostaddr);
+    addr_port.push_str(":22");
+
+    let tcp = TcpStream::connect(&addr_port).unwrap();
+    let mut sess = Session::new().unwrap();
+
+    sess.handshake(&tcp).unwrap();
+    sess.userauth_password(&user, &passwd).unwrap();
+
+    let remote_path = Path::new(remote_file_path);
+
+    let (mut remote_file, stat) = sess.scp_recv(remote_path).unwrap();
+    println!("remote file size: {}", stat.size());
+    let mut contents = Vec::new();
+    remote_file.read_to_end(&mut contents).unwrap();
+
+    println!("{:?}", contents);
 }
 
 pub fn upload_file_to_remote_mechine(addrinfo: &str, local_file_path: &str, remote_file_dir: &str) {
@@ -96,14 +129,11 @@ pub fn exec_ssh_remote_command(addrinfo: &str, cmd: &str) -> String {
     sess.handshake(&tcp).unwrap();
     sess.userauth_password(&user, &passwd).unwrap();
 
-    println!("{}", cmd);
-
     let mut channel = sess.channel_session().unwrap();
     channel.exec(cmd).unwrap();
 
     let mut s = String::new();
     channel.read_to_string(&mut s).unwrap();
-    println!("{}", s);
     s
 }
 

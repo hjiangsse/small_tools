@@ -63,19 +63,33 @@ fn main() {
 
         //download file from remote mechine
         if opt.download && !opt.send {
-            /*
-            let exec_res =
-                user_interface::exec_ssh_remote_command(&config_addrs[choose_index - 1], "ls -l");
-            println!("{}", exec_res);
-             */
-
-            println!("hello");
-            let search_res = user_interface::search_remote_files_under_some_path(
+            //search file in remote mechine
+            let remote_file_list_str = user_interface::search_remote_files_under_some_path(
                 &config_addrs[choose_index - 1],
                 &remote_search_domain,
                 &opt.filename,
             );
-            println!("{}", search_res);
+
+            let rmt_files: Vec<&str> = remote_file_list_str.split('\n').collect();
+
+            for (pos, e) in rmt_files.iter().enumerate() {
+                if !(e).eq(&"") {
+                    println!("{}: {}", pos + 1, e);
+                }
+            }
+
+            //promote user specify the file want to download from remote mechine
+            let choose_file_index = user_interface::promote_user_input_index(
+                "Input the file you want download from remote: ",
+            );
+
+            if choose_file_index <= rmt_files.len() && choose_file_index > 0 {
+                user_interface::download_file_from_remote_mechine(
+                    &config_addrs[choose_index - 1],
+                    &rmt_files[choose_file_index - 1],
+                    &local_search_domain,
+                )
+            }
         }
     } else {
         println!("You choose the wrong address, bye!");
