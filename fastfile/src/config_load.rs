@@ -5,6 +5,7 @@ use std::fs;
 pub struct Config {
     localpath: String,
     remotepath: String,
+    remoteupload: String,
     addrs: Vec<String>,
 }
 
@@ -15,16 +16,6 @@ pub fn load_config_from_path(path: &str) -> Config {
 }
 
 impl Config {
-    /*
-    fn new() -> Config {
-        Config {
-            localpath: String::from(""),
-            remotepath: String::from(""),
-            addrs: vec![String::from("")],
-        }
-    }
-    */
-
     pub fn get_addrs(&self) -> Vec<String> {
         self.addrs.clone()
     }
@@ -35,5 +26,9 @@ impl Config {
 
     pub fn get_remote_domain(&self) -> String {
         self.remotepath.clone()
+    }
+
+    pub fn get_remote_upload_path(&self) -> String {
+        self.remoteupload.clone()
     }
 }

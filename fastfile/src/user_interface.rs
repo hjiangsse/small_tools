@@ -60,15 +60,15 @@ pub fn download_file_from_remote_mechine(
     sess.userauth_password(&user, &passwd).unwrap();
 
     let remote_path = Path::new(remote_file_path);
-    let (mut remote_file, _) = sess.scp_recv(remote_path).unwrap();
+    let (mut remote_file, stat) = sess.scp_recv(remote_path).unwrap();
 
-    let mut contents = Vec::new();
-    remote_file.read_to_end(&mut contents).unwrap();
+    let mut buff = vec![0; (stat.size() + 1) as usize];
+    let n = remote_file.read(&mut buff[..]).unwrap();
 
     let local_file = Path::new(local_file_dir).join(remote_path.file_name().unwrap());
 
     let mut local_write = File::create(local_file).unwrap();
-    local_write.write(&contents).unwrap();
+    local_write.write(&buff[..n]).unwrap();
 
     println!(
         "Down load file *{}* from *{}* finish!",

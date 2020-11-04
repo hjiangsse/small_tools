@@ -38,6 +38,7 @@ fn main() {
 
     let local_search_domain = config_structure.get_local_domain();
     let remote_search_domain = config_structure.get_remote_domain();
+    let remote_upload_domain = config_structure.get_remote_upload_path();
 
     if choose_index <= config_addrs.len() {
         //send file to remote mechine
@@ -56,7 +57,7 @@ fn main() {
                 user_interface::upload_file_to_remote_mechine(
                     &config_addrs[choose_index - 1],
                     &file_list[choose_file_index - 1],
-                    &remote_search_domain,
+                    &remote_upload_domain,
                 )
             }
         }
