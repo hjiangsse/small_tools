@@ -7,16 +7,39 @@ extern crate dirs;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
+extern crate subprocess;
+use subprocess::Exec;
+
 #[derive(Debug, StructOpt)]
 struct Opt {
-    #[structopt(short = "c", long = "config", default_value = "~/.fastfile.toml")]
+    #[structopt(
+        short = "c",
+        long = "config",
+        default_value = "~/.fastfile.toml",
+        help = "the config file path"
+    )]
     config: String,
-    #[structopt(short = "n", long = "filename", default_value = "cpp")]
+    #[structopt(
+        short = "n",
+        long = "filename",
+        default_value = "cpp",
+        help = "the default file name you want to send of download"
+    )]
     filename: String,
-    #[structopt(short = "s", long = "send")]
+    #[structopt(short = "s", long = "send", help = "send local file to remote mechine")]
     send: bool,
-    #[structopt(short = "d", long = "download")]
+    #[structopt(
+        short = "d",
+        long = "download",
+        help = "download file from remote mechine"
+    )]
     download: bool,
+    #[structopt(
+        short = "r",
+        long = "reconfig",
+        help = "change the default config file"
+    )]
+    reconf: bool,
 }
 
 fn main() {
@@ -24,6 +47,12 @@ fn main() {
 
     let config_pathbuf = expand_tilde(&opt.config);
     let config_path = config_pathbuf.unwrap();
+
+    if opt.reconf {
+        let exit_status = Exec::cmd("vim").arg(config_path).join().unwrap();
+        assert!(exit_status.success());
+        process::exit(0);
+    }
 
     let config_structure = config_load::load_config_from_path(config_path.to_str().unwrap());
 

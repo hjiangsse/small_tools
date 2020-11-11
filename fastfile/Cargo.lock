@@ -154,6 +154,7 @@ dependencies = [
  "serde_derive",
  "ssh2",
  "structopt",
+ "subprocess",
  "toml",
  "walkdir",
 ]
@@ -399,6 +400,16 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "subprocess"
+version = "0.2.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "69b9ad6c3e1b525a55872a4d2f2d404b3c959b7bbcbfd83c364580f68ed157bd"
+dependencies = [
+ "libc",
+ "winapi",
 ]
 
 [[package]]
