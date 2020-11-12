@@ -9,9 +9,11 @@ use std::path::Path;
 
 pub fn list_all_remote_addresses(addrs: &[String]) {
     println!("The remote addresses: ");
+    println!("-----------------------------------------------------");
     for (index, addr) in addrs.iter().enumerate() {
         println!("{}-{}", index + 1, addr);
     }
+    println!("-----------------------------------------------------");
 }
 
 pub fn promote_user_input_index(promote: &str) -> usize {
@@ -130,6 +132,17 @@ pub fn exec_ssh_remote_command(addrinfo: &str, cmd: &str) -> String {
     let mut s = String::new();
     channel.read_to_string(&mut s).unwrap();
     s
+}
+
+pub fn promote_user_select_one_domain(domains: &Vec<String>, location: &str) -> String {
+    println!("-----------------------------------------------------");
+    println!("The {} domains: ", location);
+    for (index, domain) in domains.iter().enumerate() {
+        println!("{}-{}", index + 1, domain);
+    }
+
+    let choose_index = promote_user_input_index(&format!("Please select a {} domain: ", location));
+    domains[choose_index - 1].clone()
 }
 
 fn parse_addr_elements(addr: &str) -> (String, String, String) {

@@ -65,13 +65,15 @@ fn main() {
         "please choose the one you want to interact with: ",
     );
 
-    let local_search_domain = config_structure.get_local_domain();
-    let remote_search_domain = config_structure.get_remote_domain();
-    let remote_upload_domain = config_structure.get_remote_upload_path();
+    let local_search_domains = config_structure.get_local_domains();
+    let remote_search_domains = config_structure.get_remote_domains();
+    let remote_upload_domains = config_structure.get_remote_upload_paths();
 
     if choose_index <= config_addrs.len() {
         //send file to remote mechine
         if opt.send && !opt.download {
+            let local_search_domain =
+                user_interface::promote_user_select_one_domain(&local_search_domains, "local");
             let file_list = get_local_files_under_some_path(&local_search_domain, &opt.filename);
             for (pos, e) in file_list.iter().enumerate() {
                 println!("{}: {}", pos + 1, e);
@@ -83,6 +85,10 @@ fn main() {
             );
 
             if choose_file_index <= file_list.len() && choose_file_index > 0 {
+                let remote_upload_domain = user_interface::promote_user_select_one_domain(
+                    &remote_upload_domains,
+                    "upload",
+                );
                 user_interface::upload_file_to_remote_mechine(
                     &config_addrs[choose_index - 1],
                     &file_list[choose_file_index - 1],
@@ -94,6 +100,8 @@ fn main() {
         //download file from remote mechine
         if opt.download && !opt.send {
             //search file in remote mechine
+            let remote_search_domain =
+                user_interface::promote_user_select_one_domain(&remote_search_domains, "remote");
             let remote_file_list_str = user_interface::search_remote_files_under_some_path(
                 &config_addrs[choose_index - 1],
                 &remote_search_domain,
@@ -114,6 +122,8 @@ fn main() {
             );
 
             if choose_file_index <= rmt_files.len() && choose_file_index > 0 {
+                let local_search_domain =
+                    user_interface::promote_user_select_one_domain(&local_search_domains, "local");
                 user_interface::download_file_from_remote_mechine(
                     &config_addrs[choose_index - 1],
                     &rmt_files[choose_file_index - 1],

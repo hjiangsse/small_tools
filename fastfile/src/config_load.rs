@@ -3,9 +3,9 @@ use std::fs;
 
 #[derive(Deserialize, Debug)]
 pub struct Config {
-    localpath: String,
-    remotepath: String,
-    remoteupload: String,
+    localpath: Vec<String>,
+    remotepath: Vec<String>,
+    remoteupload: Vec<String>,
     addrs: Vec<String>,
 }
 
@@ -20,15 +20,15 @@ impl Config {
         self.addrs.clone()
     }
 
-    pub fn get_local_domain(&self) -> String {
+    pub fn get_local_domains(&self) -> Vec<String> {
         self.localpath.clone()
     }
 
-    pub fn get_remote_domain(&self) -> String {
+    pub fn get_remote_domains(&self) -> Vec<String> {
         self.remotepath.clone()
     }
 
-    pub fn get_remote_upload_path(&self) -> String {
+    pub fn get_remote_upload_paths(&self) -> Vec<String> {
         self.remoteupload.clone()
     }
 }
