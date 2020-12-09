@@ -1,1 +1,0 @@
-/home/pi/WanderLab/small_tools/fastfile/target/x86_64-pc-windows-gnu/release/fastfile.exe: /home/pi/WanderLab/small_tools/fastfile/src/config_load.rs /home/pi/WanderLab/small_tools/fastfile/src/main.rs /home/pi/WanderLab/small_tools/fastfile/src/user_interface.rs

@@ -1,1 +1,0 @@
-{"rustc":16501238271432557654,"features":"[]","target":15929813889067324291,"profile":356755788164090427,"path":10254994420907865115,"deps":[[14404350660847988258,"winapi",false,5028352265004105221]],"local":[{"CheckDepInfo":{"dep_info":"x86_64-pc-windows-gnu/release/.fingerprint/atty-723f6d7d9e5fc13c/dep-lib-atty"}}],"rustflags":[],"metadata":17730328570175366822,"config":0}
