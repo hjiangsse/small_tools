@@ -1,0 +1,17 @@
+###########################################################################
+# libssh2 installation details
+###########################################################################
+
+prefix=/home/pi/WanderLab/small_tools/fastfile/target/x86_64-pc-windows-gnu/release/build/libssh2-sys-7afd898a99b5550d/out
+exec_prefix=
+libdir=/home/pi/WanderLab/small_tools/fastfile/target/x86_64-pc-windows-gnu/release/build/libssh2-sys-7afd898a99b5550d/out/lib
+includedir=/home/pi/WanderLab/small_tools/fastfile/target/x86_64-pc-windows-gnu/release/build/libssh2-sys-7afd898a99b5550d/out/include
+
+Name: libssh2
+URL: https://www.libssh2.org/
+Description: Library for SSH-based communication
+Version: 1.9.0_DEV
+Requires.private: 
+Libs: -L${libdir} -lssh2 
+Libs.private: 
+Cflags: -I${includedir}

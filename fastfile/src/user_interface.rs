@@ -7,6 +7,9 @@ use std::io::Write;
 use std::net::TcpStream;
 use std::path::Path;
 
+extern crate subprocess;
+use subprocess::Exec;
+
 pub fn list_all_remote_addresses(addrs: &[String]) {
     println!("The remote addresses: ");
     println!("-----------------------------------------------------");
@@ -90,6 +93,12 @@ pub fn upload_file_to_remote_mechine(addrinfo: &str, local_file_path: &str, remo
 
     sess.handshake(&tcp).unwrap();
     sess.userauth_password(&user, &passwd).unwrap();
+
+    //check if host mechine run a Windows OS, if it is, dos2unix this file
+    if cfg!(windows) {
+        let exit_status = Exec::cmd("dos2unix").arg(local_file_path).join().unwrap();
+        assert!(exit_status.success());
+    }
 
     let local_path = Path::new(local_file_path);
     let local_file_name = local_path.file_name().unwrap().to_str().unwrap();

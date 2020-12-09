@@ -1,0 +1,10 @@
+/home/pi/WanderLab/small_tools/fastfile/target/debug/deps/libstructopt_derive-eeff1a0606784b03.so: /home/pi/.cargo/registry/src/mirrors.ustc.edu.cn-35a596d97e6d1253/structopt-derive-0.4.13/src/lib.rs /home/pi/.cargo/registry/src/mirrors.ustc.edu.cn-35a596d97e6d1253/structopt-derive-0.4.13/src/attrs.rs /home/pi/.cargo/registry/src/mirrors.ustc.edu.cn-35a596d97e6d1253/structopt-derive-0.4.13/src/doc_comments.rs /home/pi/.cargo/registry/src/mirrors.ustc.edu.cn-35a596d97e6d1253/structopt-derive-0.4.13/src/parse.rs /home/pi/.cargo/registry/src/mirrors.ustc.edu.cn-35a596d97e6d1253/structopt-derive-0.4.13/src/spanned.rs /home/pi/.cargo/registry/src/mirrors.ustc.edu.cn-35a596d97e6d1253/structopt-derive-0.4.13/src/ty.rs
+
+/home/pi/WanderLab/small_tools/fastfile/target/debug/deps/structopt_derive-eeff1a0606784b03.d: /home/pi/.cargo/registry/src/mirrors.ustc.edu.cn-35a596d97e6d1253/structopt-derive-0.4.13/src/lib.rs /home/pi/.cargo/registry/src/mirrors.ustc.edu.cn-35a596d97e6d1253/structopt-derive-0.4.13/src/attrs.rs /home/pi/.cargo/registry/src/mirrors.ustc.edu.cn-35a596d97e6d1253/structopt-derive-0.4.13/src/doc_comments.rs /home/pi/.cargo/registry/src/mirrors.ustc.edu.cn-35a596d97e6d1253/structopt-derive-0.4.13/src/parse.rs /home/pi/.cargo/registry/src/mirrors.ustc.edu.cn-35a596d97e6d1253/structopt-derive-0.4.13/src/spanned.rs /home/pi/.cargo/registry/src/mirrors.ustc.edu.cn-35a596d97e6d1253/structopt-derive-0.4.13/src/ty.rs
+
+/home/pi/.cargo/registry/src/mirrors.ustc.edu.cn-35a596d97e6d1253/structopt-derive-0.4.13/src/lib.rs:
+/home/pi/.cargo/registry/src/mirrors.ustc.edu.cn-35a596d97e6d1253/structopt-derive-0.4.13/src/attrs.rs:
+/home/pi/.cargo/registry/src/mirrors.ustc.edu.cn-35a596d97e6d1253/structopt-derive-0.4.13/src/doc_comments.rs:
+/home/pi/.cargo/registry/src/mirrors.ustc.edu.cn-35a596d97e6d1253/structopt-derive-0.4.13/src/parse.rs:
+/home/pi/.cargo/registry/src/mirrors.ustc.edu.cn-35a596d97e6d1253/structopt-derive-0.4.13/src/spanned.rs:
+/home/pi/.cargo/registry/src/mirrors.ustc.edu.cn-35a596d97e6d1253/structopt-derive-0.4.13/src/ty.rs:

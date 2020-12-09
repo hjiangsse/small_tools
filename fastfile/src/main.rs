@@ -74,7 +74,15 @@ fn main() {
         if opt.send && !opt.download {
             let local_search_domain =
                 user_interface::promote_user_select_one_domain(&local_search_domains, "local");
+
             let file_list = get_local_files_under_some_path(&local_search_domain, &opt.filename);
+            //if not find file under local path, exit
+            if file_list.len() == 0 {
+                println!("Sorry, can't find the file under local path. Bye!");
+                process::exit(0);
+            }
+
+            println!("-----------------------------------------------------");
             for (pos, e) in file_list.iter().enumerate() {
                 println!("{}: {}", pos + 1, e);
             }
@@ -109,7 +117,12 @@ fn main() {
             );
 
             let rmt_files: Vec<&str> = remote_file_list_str.split('\n').collect();
-
+            //if not find file under remote path, exit
+            if rmt_files.len() == 0 {
+                println!("Sorry, can't find file under remote path. Bye!");
+                process::exit(0);
+            }
+            println!("-----------------------------------------------------");
             for (pos, e) in rmt_files.iter().enumerate() {
                 if !(e).eq(&"") {
                     println!("{}: {}", pos + 1, e);
