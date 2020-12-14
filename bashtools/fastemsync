@@ -17,30 +17,40 @@ function dopull() {
     git clone https://github.com/hjiangsse/emsync.git
 
     #repalce
-    mv ./emsync/.emacs.d ~/.emacs.d
+    cp ./emsync/emconf.tar.gz ~
+    cd ~
+    tar -xvzf emconf.tar.gz
+    rm emconf.tar.gz
+    cd -
 
     #clear
-    rm -rf ./emsync/
+    rm -rf emsync
 }
 
 #do the push work, push local configs to remote repo on github
 function dopush() {
     #delete Configs dir in current dir(if have)
-    if [ -d "Configs" ]
+    if [ -d "emsync" ]
     then
-        rm -rf Configs
+        rm -rf emsync
     fi
 
     #clone remote repo to local
     git clone https://github.com/hjiangsse/emsync.git
 
     #delete the old configs
-    rm -r emsync/*
+    cd emsync
+    ls -a | grep -v .git | xargs rm -r &> /dev/null
 
     #replace
-    cp -r ~/.emacs.d emsync/
+    pw=$(pwd)
+    echo ${pw}
+    
+    cd ~
+    tar -cvzf emconf.tar.gz .emacs.d
+    eval "mv emconf.tar.gz ${pw}"
+    cd $pw
 
-    cd emsync
     git add *
     git commit -m "New commit"
     git push
@@ -61,12 +71,12 @@ then
     exit 0
 fi
 
-if [ $1 == "push" ]
-then
+if [ $1 == "push" ]; then
     dopush
+    exit 0
 fi
 
-if [ $1 == "pull" ]
-then
+if [ $1 == "pull" ]; then
     dopull
+    exit 0
 fi
