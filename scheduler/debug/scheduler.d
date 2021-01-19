@@ -1,1 +1,0 @@
-/home/pi/WanderLab/scheduler/./debug/scheduler: /home/pi/WanderLab/scheduler/./debug/src/main.rs /home/pi/WanderLab/scheduler/./debug/src/schedule_item.rs /home/pi/WanderLab/scheduler/./debug/src/user_interface.rs

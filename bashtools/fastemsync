@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#help function
 function help() {
     echo "$0 pull: pull emacs config from remote github repo."
     echo "$0 push: push local emacs config to remote github repo."
