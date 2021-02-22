@@ -1,0 +1,35 @@
+{
+    "FileType": "Binary",
+    "FileSize": {
+	"Type": "int",
+	"Length": 4,
+	"Value": 8
+    },
+    "RecordNum": {
+	"Type": "int",
+	"Length": 4,
+	"Value": 4
+    },
+    "RecordBody": {
+	"Field1": {
+	    "Type": "uint64",
+	    "Length": 8,
+	    "Value": 1234
+	},
+	"Field2": {
+	    "Type": "char",
+	    "Length": 10,
+	    "Value": "A123456789"
+	},
+	"Field3": {
+	    "Type": "char",
+	    "Length": 1,
+	    "Value": "B"
+	},
+	"Field4": {
+	    "Type": "uint32",
+	    "Length": 4,
+	    "Value": 1024
+	}
+    }
+}
