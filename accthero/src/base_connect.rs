@@ -22,13 +22,11 @@ impl ConnectData {
         let client = Client::connect(
             &format!(
                 "host={} user={} password={} dbname={}",
-                self.host,
-                self.user,
-                self.password,
-                self.dbname
+                self.host, self.user, self.password, self.dbname
             ),
             NoTls,
-        ).unwrap();
+        )
+        .unwrap();
         client
     }
 }
